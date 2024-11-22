@@ -1,0 +1,55 @@
+import { useState, useEffect, useCallback, useRef } from 'react';
+
+const AUDIO_SETTINGS_KEY = 'audioNotificationSettings';
+
+// Short notification sound in base64 format
+const NOTIFICATION_SOUND = 'data:audio/mp3;base64,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';
+
+export function useAudioNotification() {
+  const [muted, setMuted] = useState(() => {
+    const saved = localStorage.getItem(AUDIO_SETTINGS_KEY);
+    return saved ? JSON.parse(saved).muted : false;
+  });
+  
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  useEffect(() => {
+    // Create audio element with base64 encoded sound
+    audioRef.current = new Audio(NOTIFICATION_SOUND);
+    audioRef.current.volume = 0.5;
+    
+    // Listen for new incident events
+    const handleNewIncident = () => {
+      if (!muted && audioRef.current) {
+        // Reset audio to start and play
+        audioRef.current.currentTime = 0;
+        audioRef.current.play().catch(error => {
+          console.warn('Audio playback failed:', error);
+        });
+      }
+    };
+
+    window.addEventListener('newIncident', handleNewIncident);
+    
+    return () => {
+      window.removeEventListener('newIncident', handleNewIncident);
+      if (audioRef.current) {
+        audioRef.current = null;
+      }
+    };
+  }, [muted]);
+
+  // Save mute preference to localStorage
+  useEffect(() => {
+    localStorage.setItem(AUDIO_SETTINGS_KEY, JSON.stringify({ muted }));
+  }, [muted]);
+
+  const toggleMute = useCallback(() => {
+    setMuted((prevMuted: boolean) => !prevMuted);
+  }, []);
+
+  return {
+    muted,
+    toggleMute
+  };
+}
