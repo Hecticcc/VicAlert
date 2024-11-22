@@ -7,6 +7,11 @@ interface StationBadgeProps {
 }
 
 export const StationBadge = memo(function StationBadge({ station, isAdditional }: StationBadgeProps) {
+  // Skip rendering FGD, EMR, and E24 stations
+  if (station.includes('FGD') || station.includes('EMR') || station.includes('E24')) {
+    return null;
+  }
+
   const fullName = getStationName(station);
   
   // Don't show tooltip for AFPR stations
