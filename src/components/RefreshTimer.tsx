@@ -27,7 +27,7 @@ export const RefreshTimer = memo(function RefreshTimer({
           className={`${isLoading ? 'animate-spin' : ''} text-white/90`}
         />
       </button>
-      <span className="text-sm text-white/90">
+      <span className="text-sm text-white/90 whitespace-nowrap">
         Refreshing in {seconds}s
       </span>
     </div>

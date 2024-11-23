@@ -33,7 +33,7 @@ export const StationMovement = memo(function StationMovement({
         </span>
       </div>
 
-      <div className="flex items-center justify-between gap-4">
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
         {/* From Station */}
         <div className="flex-1 bg-white dark:bg-gray-800 rounded-lg p-3 shadow-sm">
           <div className="flex items-center gap-2">
@@ -48,7 +48,7 @@ export const StationMovement = memo(function StationMovement({
         </div>
 
         {/* Arrow */}
-        <div className="flex-shrink-0 relative">
+        <div className="flex-shrink-0 relative self-center rotate-90 sm:rotate-0">
           <div className="absolute inset-0 flex items-center justify-center animate-pulse">
             <MoveRight size={24} className="text-blue-400 dark:text-blue-500" />
           </div>

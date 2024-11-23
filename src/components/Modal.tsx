@@ -30,7 +30,6 @@ export function Modal({ isOpen, onClose, children, title }: ModalProps) {
 
   if (!isOpen) return null;
 
-  // Use createPortal to render the modal at the root level
   return createPortal(
     <div 
       className="fixed inset-0 z-[99999] flex items-center justify-center p-4 bg-black/50"
@@ -40,7 +39,7 @@ export function Modal({ isOpen, onClose, children, title }: ModalProps) {
     >
       <div
         ref={modalRef}
-        className="w-full max-w-lg bg-white dark:bg-gray-800 rounded-lg shadow-xl animate-modalEnter"
+        className="w-full max-w-lg bg-white dark:bg-gray-800 rounded-lg shadow-xl animate-modalEnter max-h-[90vh] flex flex-col"
         onClick={e => e.stopPropagation()}
       >
         <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
@@ -51,13 +50,13 @@ export function Modal({ isOpen, onClose, children, title }: ModalProps) {
           )}
           <button
             onClick={onClose}
-            className="p-2 text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300 rounded-lg transition-colors"
+            className="p-2 text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300 rounded-lg transition-colors ml-auto"
             aria-label="Close modal"
           >
             <X size={20} />
           </button>
         </div>
-        <div className="p-4 max-h-[calc(90vh-8rem)] overflow-y-auto">
+        <div className="p-4 overflow-y-auto">
           {children}
         </div>
       </div>

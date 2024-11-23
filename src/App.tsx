@@ -21,7 +21,6 @@ export default function App() {
   
   const handleIncidentClick = useCallback((id: string) => {
     setActiveIncidentId(id);
-    // Track incident clicks in Google Analytics
     window.gtag?.('event', 'incident_click', {
       incident_id: id
     });
@@ -30,17 +29,14 @@ export default function App() {
   const { pinnedIncidents: sortedPinnedIncidents, paginatedIncidents, totalPages } = useMemo(() => {
     const pinnedIds = new Set(pinnedIncidents.map(pin => pin.id));
     
-    // Get pinned incidents
     const pinned = incidents
       .filter(incident => pinnedIds.has(incident.id))
       .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
     
-    // Get unpinned incidents
     const unpinned = incidents
       .filter(incident => !pinnedIds.has(incident.id))
       .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
 
-    // Calculate pagination
     const startIndex = (currentPage - 1) * INCIDENTS_PER_PAGE;
     const endIndex = startIndex + INCIDENTS_PER_PAGE;
     const paginatedList = unpinned.slice(startIndex, endIndex);
@@ -56,7 +52,6 @@ export default function App() {
   const handlePageChange = useCallback((page: number) => {
     setCurrentPage(page);
     window.scrollTo({ top: 0, behavior: 'smooth' });
-    // Track page changes in Google Analytics
     window.gtag?.('event', 'page_change', {
       page_number: page
     });
@@ -103,10 +98,9 @@ export default function App() {
 
     return (
       <div className="space-y-4 max-w-4xl mx-auto">
-        {/* Pinned Incidents Section */}
         {sortedPinnedIncidents.length > 0 && (
           <div className="space-y-2">
-            <h2 className="text-lg font-semibold text-purple-600 dark:text-purple-400 flex items-center gap-2">
+            <h2 className="text-lg font-semibold text-purple-600 dark:text-purple-400 flex items-center gap-2 px-4 sm:px-0">
               Pinned Incidents
             </h2>
             {sortedPinnedIncidents.map(incident => {
@@ -115,7 +109,7 @@ export default function App() {
                 <div 
                   key={incident.id}
                   onClick={() => handleIncidentClick(incident.id)}
-                  className={`cursor-pointer transition-all ${
+                  className={`cursor-pointer transition-all mx-4 sm:mx-0 ${
                     activeIncidentId === incident.id ? 'scale-[1.02] shadow-md' : ''
                   }`}
                 >
@@ -129,10 +123,9 @@ export default function App() {
           </div>
         )}
 
-        {/* Regular Incidents Section */}
         <div className="space-y-2">
           {sortedPinnedIncidents.length > 0 && paginatedIncidents.length > 0 && (
-            <h2 className="text-lg font-semibold text-gray-600 dark:text-gray-400">
+            <h2 className="text-lg font-semibold text-gray-600 dark:text-gray-400 px-4 sm:px-0">
               Active Incidents
             </h2>
           )}
@@ -142,7 +135,7 @@ export default function App() {
               <div 
                 key={incident.id}
                 onClick={() => handleIncidentClick(incident.id)}
-                className={`cursor-pointer transition-all ${
+                className={`cursor-pointer transition-all mx-4 sm:mx-0 ${
                   activeIncidentId === incident.id ? 'scale-[1.02] shadow-md' : ''
                 }`}
               >
@@ -155,9 +148,8 @@ export default function App() {
           })}
         </div>
 
-        {/* Pagination */}
         {totalPages > 1 && (
-          <div className="flex items-center justify-center gap-2 mt-6">
+          <div className="flex items-center justify-center gap-2 mt-6 px-4 sm:px-0 overflow-x-auto pb-4">
             <button
               onClick={() => handlePageChange(currentPage - 1)}
               disabled={currentPage === 1}
@@ -206,10 +198,10 @@ export default function App() {
                 <img 
                   src="https://imgur.com/pxkaqfE.png" 
                   alt="VicAlert" 
-                  className="h-14 w-auto object-contain"
+                  className="h-10 sm:h-14 w-auto object-contain"
                 />
               </div>
-              <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2 sm:gap-4">
                 <button
                   onClick={toggleMute}
                   className="p-2 hover:bg-white/10 rounded-lg transition-colors"
@@ -224,19 +216,21 @@ export default function App() {
                 >
                   {isDarkMode ? <Sun size={20} /> : <Moon size={20} />}
                 </button>
-                <RefreshTimer
-                  timeUntilRefresh={timeUntilRefresh}
-                  onRefresh={refresh}
-                  isLoading={isLoading}
-                />
+                <div className="hidden sm:block">
+                  <RefreshTimer
+                    timeUntilRefresh={timeUntilRefresh}
+                    onRefresh={refresh}
+                    isLoading={isLoading}
+                  />
+                </div>
               </div>
             </div>
           </div>
         </header>
 
-        <main className="container mx-auto px-4 py-4">
+        <main className="container mx-auto px-0 sm:px-4 py-4">
           {!isLoading && !isError && incidents.length > 0 && (
-            <div className="mb-6 h-[400px] relative z-0">
+            <div className="mb-6 h-[300px] sm:h-[400px] relative z-0 mx-4 sm:mx-0">
               <IncidentMap 
                 incidents={incidents} 
                 activeIncidentId={activeIncidentId}
