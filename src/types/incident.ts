@@ -23,4 +23,6 @@ export interface Incident {
   rawText?: string;
   hasUpdate?: boolean;
   tags?: string[];
+  district?: number;
+  initialBrigade?: string;
 }

@@ -14,6 +14,15 @@ const VICGRID = {
 };
 
 const STREET_COORDINATES: Record<string, [number, number]> = {
+  // Updated/New addresses
+  'CLEELAND ST DANDENONG': [-37.9882, 145.2153],
+  'PRINCES HWY NARRE WARREN': [-37.9776, 145.3037],
+  'GRANT ST CRANBOURNE': [-38.1128, 145.2834],
+  'ARGYLE ST TRARALGON': [-38.1965, 146.5396],
+  'PROGRESS RD ELTHAM NORTH': [-37.7018, 145.1472],
+  'CORIO DAM RD SCARSDALE': [-37.7018, 143.6472],
+  
+  // Existing addresses
   'DOBIES CT WESTMEADOWS': [-37.6725, 144.8805],
   'GRANTHAM DR HIGHTON': [-38.1845, 144.3155],
   'HUME HWY CRAIGIEBURN': [-37.5997, 144.9445],
@@ -21,6 +30,15 @@ const STREET_COORDINATES: Record<string, [number, number]> = {
 };
 
 const LOCATION_COORDINATES: Record<string, [number, number]> = {
+  // Major locations
+  'DANDENONG': [-37.9882, 145.2153],
+  'NARRE WARREN': [-37.9776, 145.3037],
+  'CRANBOURNE': [-38.1128, 145.2834],
+  'TRARALGON': [-38.1965, 146.5396],
+  'ELTHAM NORTH': [-37.7018, 145.1472],
+  'SCARSDALE': [-37.7018, 143.6472],
+  
+  // Existing locations
   'WESTMEADOWS': [-37.6747, 144.8811],
   'HIGHTON': [-38.1833, 144.3167],
   'CRAIGIEBURN': [-37.6000, 144.9500],
@@ -34,7 +52,17 @@ function normalizeAddress(address: string): string {
     .toUpperCase()
     .replace(/\s+/g, ' ')
     .replace(/\([^)]*\)/g, '')
+    .replace(/^(\d+\s+)/, '') // Remove leading house numbers
     .trim();
+}
+
+function extractLocationFromAddress(address: string): string {
+  // Extract location name from the end of the address
+  const parts = address.split(/\s+/);
+  const lastTwoWords = parts.slice(-2).join(' ');
+  const lastWord = parts[parts.length - 1];
+
+  return LOCATION_COORDINATES[lastTwoWords] ? lastTwoWords : lastWord;
 }
 
 export function geocodeAddress(location: Location): [number, number] | null {
@@ -55,9 +83,23 @@ export function geocodeAddress(location: Location): [number, number] | null {
       }
     }
 
-    // Check location matches
-    for (const [loc, coords] of Object.entries(LOCATION_COORDINATES)) {
-      if (normalized.includes(loc)) {
+    // Extract and check location name
+    const locationName = extractLocationFromAddress(normalized);
+    if (locationName && LOCATION_COORDINATES[locationName]) {
+      const coords = LOCATION_COORDINATES[locationName];
+      geocodeCache.set(cacheKey, coords);
+      return coords;
+    }
+
+    // If no match found, try to parse street name and suburb
+    const streetMatch = normalized.match(/([^,]+),?\s+([^,]+)$/);
+    if (streetMatch) {
+      const [, street, suburb] = streetMatch;
+      const streetKey = Object.keys(STREET_COORDINATES).find(k => 
+        k.includes(street) && k.includes(suburb)
+      );
+      if (streetKey) {
+        const coords = STREET_COORDINATES[streetKey];
         geocodeCache.set(cacheKey, coords);
         return coords;
       }

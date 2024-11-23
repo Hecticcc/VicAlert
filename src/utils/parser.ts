@@ -1,4 +1,5 @@
 import { Incident } from '../types/incident';
+import { getDistrictFromCode } from './cfaDistricts';
 
 // Alert type patterns with priorities
 const ALERT_PATTERNS: Record<string, string> = {
@@ -210,6 +211,57 @@ function determineTags(text: string): string[] {
   return tags;
 }
 
+function extractFRVCode(text: string): string | undefined {
+  // Match both 5-digit and 3-digit codes after @@ALERT
+  const match = text.match(/@@ALERT\s+(\d{2,5})\s/);
+  if (match) {
+    const fullCode = match[1];
+    // Remove leading zeros and take first two digits
+    const stationNumber = fullCode.replace(/^0+/, '').slice(0, 2).padStart(2, '0');
+    return `P${stationNumber}`;
+  }
+  return undefined;
+}
+
+function determineDistrict(text: string): number | undefined {
+  // First try to extract FRV code
+  const frvCode = extractFRVCode(text);
+  if (frvCode) {
+    return getDistrictFromCode(frvCode);
+  }
+
+  // If no FRV code, try to match CFA brigade code
+  const brigadeMatch = text.match(/@@ALERT\s+([A-Z0-9]+)\s/);
+  if (!brigadeMatch) return undefined;
+
+  const code = brigadeMatch[1];
+
+  // If it's a numeric code (FRV station)
+  if (/^\d+$/.test(code)) {
+    // Remove leading zeros and take first two digits
+    const stationNumber = code.replace(/^0+/, '').slice(0, 2).padStart(2, '0');
+    return getDistrictFromCode(`P${stationNumber}`);
+  }
+
+  // Try direct lookup first
+  let district = getDistrictFromCode(code);
+  if (district) return district;
+
+  // Try without numbers and special characters
+  const cleanCode = code.replace(/[0-9\[\]_]/g, '');
+  district = getDistrictFromCode(cleanCode);
+  if (district) return district;
+
+  // If still no match and it's a P or FS code, try the other prefix
+  if (code.startsWith('P')) {
+    district = getDistrictFromCode(`FS${code.slice(1)}`);
+  } else if (code.startsWith('FS')) {
+    district = getDistrictFromCode(`P${code.slice(2)}`);
+  }
+
+  return district;
+}
+
 export function parseIncidentData(text: string): Incident[] {
   if (!text) {
     console.warn('No incident text provided');
@@ -258,6 +310,13 @@ export function parseIncidentData(text: string): Incident[] {
     const { stations, stationDisplay, additionalStations } = parseStations(group.join('\n'));
     const tags = determineTags(mainLine);
 
+    // Determine district using the extracted FRV code or brigade code
+    const district = determineDistrict(mainLine);
+
+    // Extract initial brigade code for reference
+    const initialBrigadeMatch = mainLine.match(/@@ALERT\s+([A-Z0-9]+)\s/);
+    const initialBrigade = initialBrigadeMatch ? initialBrigadeMatch[1] : undefined;
+
     const timestampMatch = mainLine.match(/(\d{2}:\d{2}:\d{2})\s+(\d{4}-\d{2}-\d{2})/);
     const timestamp = timestampMatch 
       ? new Date(`${timestampMatch[2]}T${timestampMatch[1]}`).toISOString()
@@ -281,7 +340,9 @@ export function parseIncidentData(text: string): Incident[] {
       stationDisplay,
       rawText: group.join('\n'),
       hasUpdate: group.length > 1,
-      tags
+      tags,
+      district,
+      initialBrigade
     };
   });
 }

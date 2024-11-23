@@ -7,8 +7,18 @@ interface StationBadgeProps {
 }
 
 export const StationBadge = memo(function StationBadge({ station, isAdditional }: StationBadgeProps) {
-  // Skip rendering FGD, EMR, and E24 stations
-  if (station.includes('FGD') || station.includes('EMR') || station.includes('E24')) {
+  // Skip rendering for:
+  // - FGD stations
+  // - EMR stations
+  // - E24 stations
+  // - Stations with 2 or fewer characters
+  // - ATTEND stations
+  if (station.includes('FGD') || 
+      station.includes('EMR') || 
+      station.includes('E24') || 
+      station.startsWith('E24') ||
+      station.length <= 2 ||
+      station === 'ATTEND') {
     return null;
   }
 

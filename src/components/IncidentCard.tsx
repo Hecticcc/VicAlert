@@ -1,5 +1,5 @@
 import { memo, useState } from 'react';
-import { Clock, Share2, MapPin, Building2, AlertCircle, Heart } from 'lucide-react';
+import { Clock, Share2, MapPin, Building2, AlertCircle, Heart, MapPinned } from 'lucide-react';
 import { format, formatDistanceToNowStrict } from 'date-fns';
 import { Incident } from '../types/incident';
 import { Modal } from './Modal';
@@ -57,9 +57,10 @@ export const IncidentCard = memo(function IncidentCard({ incident, pinnedInfo }:
     roundingMethod: 'floor'
   });
 
+  // Clean up description by removing location information if it matches
   const cleanDescription = incident.description
     .replace(new RegExp(`^${incident.location.address}\\s*`, 'i'), '')
-    .replace(/^\d+\s+/, '')
+    .replace(/^\d+\s+/, '') // Remove leading numbers
     .trim();
 
   if (isStationMovement) {
@@ -77,11 +78,11 @@ export const IncidentCard = memo(function IncidentCard({ incident, pinnedInfo }:
 
   return (
     <>
-      <div className={`flex flex-col sm:flex-row items-start sm:items-center gap-4 p-4 bg-white dark:bg-gray-800 rounded-lg shadow-sm hover:shadow-md transition-all border border-gray-100 dark:border-gray-700 ${
+      <div className={`flex items-center gap-4 p-4 bg-white dark:bg-gray-800 rounded-lg shadow-sm hover:shadow-md transition-all border border-gray-100 dark:border-gray-700 ${
         pinnedInfo ? 'ring-2 ring-purple-200 dark:ring-purple-800' : ''
       }`}>
         {/* Left side - Priority indicator */}
-        <div className="flex flex-row sm:flex-col items-center gap-2">
+        <div className="flex flex-col items-center gap-2">
           <div className="relative">
             <div className={`w-1.5 h-14 rounded-full ${
               isPending ? 'bg-gray-200 dark:bg-gray-600' :
@@ -110,9 +111,9 @@ export const IncidentCard = memo(function IncidentCard({ incident, pinnedInfo }:
         </div>
 
         {/* Main content */}
-        <div className="flex-1 min-w-0 w-full sm:w-auto">
-          {/* Top row - Status and time */}
-          <div className="flex flex-wrap items-center gap-2 mb-2">
+        <div className="flex-1 min-w-0">
+          {/* Top row - Status, time, and district */}
+          <div className="flex items-center gap-2 mb-2 flex-wrap">
             <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${severityColors.light[incident.severity]} ${severityColors.dark[incident.severity]}`}>
               {incident.severity.toUpperCase()}
             </span>
@@ -122,11 +123,19 @@ export const IncidentCard = memo(function IncidentCard({ incident, pinnedInfo }:
               <span className="mx-1">·</span>
               <span>{timeAgo}</span>
             </div>
+            {incident.district && (
+              <div className="flex items-center gap-1 px-2 py-0.5 bg-indigo-50 dark:bg-indigo-900/30 rounded-full">
+                <MapPinned size={12} className="text-indigo-500 dark:text-indigo-400" />
+                <span className="text-xs font-medium text-indigo-600 dark:text-indigo-400">
+                  District {incident.district}
+                </span>
+              </div>
+            )}
             {hasAdditionalStations && (
               <div className="flex items-center gap-1 px-2 py-0.5 bg-amber-50 dark:bg-amber-900/30 rounded-full">
                 <AlertCircle size={12} className="text-amber-500 dark:text-amber-400" />
                 <span className="text-xs font-medium text-amber-600 dark:text-amber-400">
-                  Additional Appliances
+                  Additional Appliances Requested
                 </span>
               </div>
             )}
@@ -167,8 +176,8 @@ export const IncidentCard = memo(function IncidentCard({ incident, pinnedInfo }:
           </div>
 
           {/* Stations */}
-          <div className="flex items-start sm:items-center gap-1.5 flex-wrap">
-            <Building2 size={14} className="text-gray-400 dark:text-gray-500 flex-shrink-0 mt-1 sm:mt-0" />
+          <div className="flex items-center gap-1.5">
+            <Building2 size={14} className="text-gray-400 dark:text-gray-500 flex-shrink-0" />
             <div className="flex flex-wrap gap-1">
               {incident.stations.map((station) => (
                 <StationBadge 
@@ -190,7 +199,7 @@ export const IncidentCard = memo(function IncidentCard({ incident, pinnedInfo }:
         </div>
 
         {/* Right side - Actions */}
-        <div className="flex flex-row sm:flex-col items-end gap-2 mt-2 sm:mt-0 w-full sm:w-auto justify-end">
+        <div className="flex flex-col items-end gap-2">
           <button
             onClick={handleShare}
             className="p-1.5 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-md transition-colors"
@@ -207,7 +216,7 @@ export const IncidentCard = memo(function IncidentCard({ incident, pinnedInfo }:
         title={`Incident ${incident.reference}`}
       >
         <div className="space-y-4">
-          <div className="flex flex-wrap items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
             <span className={`px-2 py-1 rounded-full text-sm font-medium ${severityColors.light[incident.severity]} ${severityColors.dark[incident.severity]}`}>
               {incident.severity.toUpperCase()}
             </span>
@@ -222,13 +231,18 @@ export const IncidentCard = memo(function IncidentCard({ incident, pinnedInfo }:
                 Medical
               </span>
             )}
+            {incident.district && (
+              <span className="px-2 py-1 rounded-full text-sm font-medium bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400">
+                District {incident.district}
+              </span>
+            )}
           </div>
           
           <div className="space-y-2">
             <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
               {incident.alertType}
             </p>
-            <pre className="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap font-mono bg-gray-50 dark:bg-gray-900 p-4 rounded-lg overflow-x-auto">
+            <pre className="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap font-mono bg-gray-50 dark:bg-gray-900 p-4 rounded-lg">
               {incident.rawText}
             </pre>
           </div>
