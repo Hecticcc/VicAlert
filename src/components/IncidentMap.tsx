@@ -1,10 +1,11 @@
-import { memo, useMemo, useRef, useCallback } from 'react';
+import { memo, useMemo, useRef, useCallback, useState } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import { LatLngBounds, Popup as LeafletPopup } from 'leaflet';
 import { X } from 'lucide-react';
 import { Incident } from '../types/incident';
 import { geocodeAddress } from '../utils/geocoding';
 import { getIncidentIcon } from '../utils/incidentIcons';
+import { MapOverlay } from './MapOverlay';
 
 interface IncidentMapProps {
   incidents: Incident[];
@@ -116,6 +117,8 @@ export const IncidentMap = memo(function IncidentMap({
   activeIncidentId,
   onMarkerClick 
 }: IncidentMapProps) {
+  const [isOverlayVisible, setIsOverlayVisible] = useState(true);
+
   const markers = useMemo(() => {
     const recentIncidents = incidents
       .filter(incident => {
@@ -144,29 +147,35 @@ export const IncidentMap = memo(function IncidentMap({
   }, [incidents, activeIncidentId]);
 
   return (
-    <MapContainer
-      center={VICTORIA_CENTER}
-      zoom={8}
-      className="w-full h-full rounded-lg shadow-lg"
-      maxBounds={VICTORIA_BOUNDS}
-      maxBoundsViscosity={1.0}
-      scrollWheelZoom={true}
-      closePopupOnClick={true}
-      zoomControl={true}
-    >
-      <TileLayer
-        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-      />
-      {markers.map(marker => (
-        <MarkerWithPopup
-          key={marker.incident.id}
-          incident={marker.incident}
-          position={marker.coordinates}
-          icon={marker.icon}
-          onClick={() => onMarkerClick?.(marker.incident.id)}
+    <div className="relative w-full h-full">
+      <MapContainer
+        center={VICTORIA_CENTER}
+        zoom={8}
+        className="w-full h-full rounded-lg shadow-lg"
+        maxBounds={VICTORIA_BOUNDS}
+        maxBoundsViscosity={1.0}
+        scrollWheelZoom={true}
+        closePopupOnClick={true}
+        zoomControl={true}
+      >
+        <TileLayer
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
-      ))}
-    </MapContainer>
+        {markers.map(marker => (
+          <MarkerWithPopup
+            key={marker.incident.id}
+            incident={marker.incident}
+            position={marker.coordinates}
+            icon={marker.icon}
+            onClick={() => onMarkerClick?.(marker.incident.id)}
+          />
+        ))}
+      </MapContainer>
+      <MapOverlay 
+        isVisible={isOverlayVisible} 
+        onClose={() => setIsOverlayVisible(false)} 
+      />
+    </div>
   );
 });
