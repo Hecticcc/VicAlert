@@ -123,12 +123,6 @@ export const IncidentCard = memo(function IncidentCard({ incident, pinnedInfo }:
               <span className="mx-1">·</span>
               <span>{timeAgo}</span>
             </div>
-            {pinnedInfo && (
-              <PinnedBadge 
-                pinnedAt={pinnedInfo.pinnedAt} 
-                duration={pinnedInfo.duration}
-              />
-            )}
             {incident.district && (
               <div className="flex items-center gap-1 px-2 py-0.5 bg-indigo-50 dark:bg-indigo-900/30 rounded-full">
                 <MapPinned size={12} className="text-indigo-500 dark:text-indigo-400" />
@@ -152,6 +146,12 @@ export const IncidentCard = memo(function IncidentCard({ incident, pinnedInfo }:
                   Medical
                 </span>
               </div>
+            )}
+            {pinnedInfo && (
+              <PinnedBadge 
+                pinnedAt={pinnedInfo.pinnedAt} 
+                duration={pinnedInfo.duration}
+              />
             )}
           </div>
 

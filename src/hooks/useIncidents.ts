@@ -124,21 +124,20 @@ export function useIncidents() {
     const { data } = loadPinnedIncidents();
     return data;
   });
+  const [isInitialLoad, setIsInitialLoad] = useState(true);
   const timerRef = useRef<NodeJS.Timeout>();
   const retryCountRef = useRef(0);
   const previousIncidentsRef = useRef<Incident[]>([]);
   const lastPinUpdateRef = useRef<number>(Date.now());
 
-  const { data: rawIncidents, error, isLoading, mutate } = useSWR('incidents', fetcher, {
+  const { data: rawIncidents, error, isLoading: isSWRLoading, mutate } = useSWR('incidents', fetcher, {
     refreshInterval: REFRESH_INTERVAL,
     revalidateOnFocus: true,
     dedupingInterval: 5000,
     fallbackData: [],
-    onError: () => {
-      retryCountRef.current++;
-    },
     onSuccess: (newData) => {
       retryCountRef.current = 0;
+      setIsInitialLoad(false);
       
       if (previousIncidentsRef.current.length > 0) {
         const latestPreviousTimestamp = Math.max(
@@ -296,7 +295,7 @@ export function useIncidents() {
 
   return {
     incidents: processedIncidents,
-    isLoading: isLoading && !processedIncidents?.length,
+    isLoading: (isSWRLoading && isInitialLoad) || !processedIncidents?.length,
     isError: Boolean(error) || retryCountRef.current >= MAX_RETRIES,
     timeUntilRefresh,
     refresh,

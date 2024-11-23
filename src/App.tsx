@@ -10,6 +10,7 @@ import { ScrollToTop } from './components/ScrollToTop';
 import { BetaWarning } from './components/BetaWarning';
 import { GoogleAnalytics } from './components/GoogleAnalytics';
 import { BugReportButton } from './components/BugReportButton';
+import { LoadingSpinner } from './components/LoadingSpinner';
 
 const INCIDENTS_PER_PAGE = 50;
 
@@ -69,15 +70,8 @@ export default function App() {
   }, []);
 
   const renderContent = useMemo(() => {
-    if (isLoading && !incidents.length) {
-      return (
-        <div className="flex items-center justify-center h-[50vh]">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 dark:border-blue-400 mx-auto"></div>
-            <p className="mt-4 text-gray-600 dark:text-gray-400">Loading incidents...</p>
-          </div>
-        </div>
-      );
+    if (isLoading) {
+      return <LoadingSpinner />;
     }
 
     if (isError) {
@@ -197,7 +191,7 @@ export default function App() {
         )}
       </div>
     );
-  }, [sortedPinnedIncidents, paginatedIncidents, isLoading, isError, refresh, activeIncidentId, handleIncidentClick, pinnedIncidents, totalPages, currentPage, handlePageChange, incidents.length]);
+  }, [sortedPinnedIncidents, paginatedIncidents, isLoading, isError, refresh, activeIncidentId, handleIncidentClick, pinnedIncidents, totalPages, currentPage, handlePageChange]);
 
   return (
     <div className={isDarkMode ? 'dark' : ''}>
