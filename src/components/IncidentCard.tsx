@@ -78,13 +78,13 @@ export const IncidentCard = memo(function IncidentCard({ incident, pinnedInfo }:
 
   return (
     <>
-      <div className={`flex flex-col sm:flex-row items-start gap-4 p-4 bg-white dark:bg-gray-800 rounded-lg shadow-sm hover:shadow-md transition-all border border-gray-100 dark:border-gray-700 ${
+      <div className={`flex flex-col sm:flex-row items-start gap-4 p-3 sm:p-4 bg-white dark:bg-gray-800 rounded-lg shadow-sm hover:shadow-md transition-all border border-gray-100 dark:border-gray-700 ${
         pinnedInfo ? 'ring-2 ring-purple-200 dark:ring-purple-800' : ''
       }`}>
         {/* Left side - Priority indicator */}
-        <div className="flex flex-row sm:flex-col items-center gap-2">
+        <div className="flex flex-row sm:flex-col items-center gap-2 w-full sm:w-auto">
           <div className="relative">
-            <div className={`w-1.5 h-14 rounded-full ${
+            <div className={`w-1.5 h-10 sm:h-14 rounded-full ${
               isPending ? 'bg-gray-200 dark:bg-gray-600' :
               isCode1 ? 'bg-gradient-to-b from-red-400 to-red-600 dark:from-red-500 dark:to-red-700' : 
               'bg-gradient-to-b from-blue-400 to-blue-600 dark:from-blue-500 dark:to-blue-700'
@@ -97,36 +97,36 @@ export const IncidentCard = memo(function IncidentCard({ incident, pinnedInfo }:
             </div>
           </div>
           <div className="flex flex-col items-center">
-            <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${
+            <span className={`text-xs font-medium px-2 py-0.5 rounded-full whitespace-nowrap ${
               isPending ? 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300' :
               isCode1 ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400' : 
               'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
             }`}>
               {isPending ? 'PENDING' : isCode1 ? 'CODE 1' : 'CODE 3'}
             </span>
-            <span className="text-[10px] text-gray-500 dark:text-gray-400 mt-1">
+            <span className="text-[10px] text-gray-500 dark:text-gray-400 mt-1 hidden sm:block">
               {isCode1 ? 'Urgent' : 'Non-urgent'}
             </span>
           </div>
         </div>
 
         {/* Main content */}
-        <div className="flex-1 min-w-0">
+        <div className="flex-1 min-w-0 w-full">
           {/* Top row - Status, time, and district */}
-          <div className="flex flex-wrap items-center gap-2 mb-2">
+          <div className="flex flex-wrap items-center gap-1.5 mb-2">
             <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${severityColors.light[incident.severity]} ${severityColors.dark[incident.severity]}`}>
               {incident.severity.toUpperCase()}
             </span>
             <div className="flex items-center text-xs text-gray-500 dark:text-gray-400">
-              <Clock size={12} className="mr-1" />
-              <span>{formattedTime}</span>
+              <Clock size={12} className="mr-1 flex-shrink-0" />
+              <span className="whitespace-nowrap">{formattedTime}</span>
               <span className="mx-1">·</span>
-              <span>{timeAgo}</span>
+              <span className="whitespace-nowrap">{timeAgo}</span>
             </div>
             {incident.district && (
               <div className="flex items-center gap-1 px-2 py-0.5 bg-indigo-50 dark:bg-indigo-900/30 rounded-full">
                 <MapPinned size={12} className="text-indigo-500 dark:text-indigo-400" />
-                <span className="text-xs font-medium text-indigo-600 dark:text-indigo-400">
+                <span className="text-xs font-medium text-indigo-600 dark:text-indigo-400 whitespace-nowrap">
                   District {incident.district}
                 </span>
               </div>
@@ -134,7 +134,7 @@ export const IncidentCard = memo(function IncidentCard({ incident, pinnedInfo }:
             {hasAdditionalStations && (
               <div className="flex items-center gap-1 px-2 py-0.5 bg-amber-50 dark:bg-amber-900/30 rounded-full">
                 <AlertCircle size={12} className="text-amber-500 dark:text-amber-400" />
-                <span className="text-xs font-medium text-amber-600 dark:text-amber-400">
+                <span className="text-xs font-medium text-amber-600 dark:text-amber-400 whitespace-nowrap">
                   Additional Appliances
                 </span>
               </div>
@@ -142,7 +142,7 @@ export const IncidentCard = memo(function IncidentCard({ incident, pinnedInfo }:
             {isMedical && (
               <div className="flex items-center gap-1 px-2 py-0.5 bg-rose-50 dark:bg-rose-900/30 rounded-full">
                 <Heart size={12} className="text-rose-500 dark:text-rose-400" />
-                <span className="text-xs font-medium text-rose-600 dark:text-rose-400">
+                <span className="text-xs font-medium text-rose-600 dark:text-rose-400 whitespace-nowrap">
                   Medical
                 </span>
               </div>
@@ -156,19 +156,19 @@ export const IncidentCard = memo(function IncidentCard({ incident, pinnedInfo }:
           </div>
 
           {/* Description */}
-          <h3 className="text-sm font-medium text-gray-900 dark:text-gray-100 mb-2">
+          <h3 className="text-sm font-medium text-gray-900 dark:text-gray-100 mb-2 break-words">
             {cleanDescription || incident.alertType}
           </h3>
 
           {/* Location */}
           <div className="flex items-start gap-1.5 mb-1">
             <MapPin size={14} className="text-gray-400 dark:text-gray-500 mt-0.5 flex-shrink-0" />
-            <div className="min-w-0">
-              <p className="text-sm text-gray-600 dark:text-gray-300 truncate">
+            <div className="min-w-0 flex-1">
+              <p className="text-sm text-gray-600 dark:text-gray-300 break-words">
                 {incident.location.address}
               </p>
               {incident.location.crossStreet && (
-                <p className="text-xs text-gray-500 dark:text-gray-400">
+                <p className="text-xs text-gray-500 dark:text-gray-400 break-words">
                   Cross streets: {incident.location.crossStreet}
                 </p>
               )}
@@ -176,9 +176,9 @@ export const IncidentCard = memo(function IncidentCard({ incident, pinnedInfo }:
           </div>
 
           {/* Stations */}
-          <div className="flex items-center gap-1.5 flex-wrap">
-            <Building2 size={14} className="text-gray-400 dark:text-gray-500 flex-shrink-0" />
-            <div className="flex flex-wrap gap-1">
+          <div className="flex items-start gap-1.5">
+            <Building2 size={14} className="text-gray-400 dark:text-gray-500 flex-shrink-0 mt-1" />
+            <div className="flex flex-wrap gap-1 flex-1">
               {incident.stations.map((station) => (
                 <StationBadge 
                   key={station} 
@@ -190,7 +190,7 @@ export const IncidentCard = memo(function IncidentCard({ incident, pinnedInfo }:
             {incident.reference && (
               <button
                 onClick={() => setShowModal(true)}
-                className="text-xs text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 ml-2 underline"
+                className="text-xs text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 ml-2 underline whitespace-nowrap"
               >
                 {incident.reference}
               </button>
@@ -199,7 +199,7 @@ export const IncidentCard = memo(function IncidentCard({ incident, pinnedInfo }:
         </div>
 
         {/* Right side - Actions */}
-        <div className="flex flex-row sm:flex-col items-end gap-2 mt-2 sm:mt-0">
+        <div className="flex flex-row sm:flex-col items-center gap-2 mt-2 sm:mt-0 w-full sm:w-auto justify-end">
           <button
             onClick={handleShare}
             className="p-1.5 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-md transition-colors"
@@ -242,7 +242,7 @@ export const IncidentCard = memo(function IncidentCard({ incident, pinnedInfo }:
             <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
               {incident.alertType}
             </p>
-            <pre className="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap font-mono bg-gray-50 dark:bg-gray-900 p-4 rounded-lg overflow-x-auto">
+            <pre className="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap font-mono bg-gray-50 dark:bg-gray-900 p-4 rounded-lg">
               {incident.rawText}
             </pre>
           </div>

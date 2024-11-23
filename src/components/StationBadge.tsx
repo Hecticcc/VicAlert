@@ -7,12 +7,7 @@ interface StationBadgeProps {
 }
 
 export const StationBadge = memo(function StationBadge({ station, isAdditional }: StationBadgeProps) {
-  // Skip rendering for:
-  // - FGD stations
-  // - EMR stations
-  // - E24 stations
-  // - Stations with 2 or fewer characters
-  // - ATTEND stations
+  // Skip rendering for specific stations (unchanged)
   if (station.includes('FGD') || 
       station.includes('EMR') || 
       station.includes('E24') || 
@@ -27,7 +22,7 @@ export const StationBadge = memo(function StationBadge({ station, isAdditional }
   // Don't show tooltip for AFPR stations
   if (station.includes('AFPR')) {
     return (
-      <span className="text-xs px-1.5 py-0.5 bg-gray-50 dark:bg-gray-700 text-gray-600 dark:text-gray-300 rounded">
+      <span className="text-xs px-1.5 py-0.5 bg-gray-50 dark:bg-gray-700 text-gray-600 dark:text-gray-300 rounded whitespace-nowrap">
         {station.replace(/[\[\]]/g, '')}
       </span>
     );
@@ -35,7 +30,7 @@ export const StationBadge = memo(function StationBadge({ station, isAdditional }
   
   return (
     <div className="group relative inline-block">
-      <span className={`text-xs px-1.5 py-0.5 rounded cursor-help ${
+      <span className={`text-xs px-1.5 py-0.5 rounded cursor-help whitespace-nowrap ${
         isAdditional
           ? 'bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300'
           : 'bg-gray-50 dark:bg-gray-700 text-gray-600 dark:text-gray-300'
@@ -43,11 +38,9 @@ export const StationBadge = memo(function StationBadge({ station, isAdditional }
         {station.replace(/[\[\]]/g, '')}
       </span>
       
-      {/* Tooltip */}
       <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-gray-900 dark:bg-gray-800 text-white text-xs rounded shadow-lg 
-                    opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 whitespace-nowrap z-50">
+                    opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 whitespace-nowrap z-50 max-w-[200px] break-words">
         {fullName}
-        {/* Arrow */}
         <div className="absolute top-full left-1/2 -translate-x-1/2 -mt-1 border-4 border-transparent border-t-gray-900 dark:border-t-gray-800" />
       </div>
     </div>

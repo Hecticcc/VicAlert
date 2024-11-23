@@ -77,7 +77,7 @@ export default function App() {
     if (isError) {
       return (
         <div className="flex items-center justify-center h-[50vh]">
-          <div className="text-center bg-red-50 dark:bg-red-900/30 p-8 rounded-xl max-w-md mx-4">
+          <div className="text-center bg-red-50 dark:bg-red-900/30 p-8 rounded-xl max-w-md">
             <h3 className="text-lg font-semibold text-red-600 dark:text-red-400 mb-4">Unable to load incidents</h3>
             <p className="text-gray-600 dark:text-gray-300 mb-6">There was a problem connecting to the incident feed.</p>
             <button 
@@ -102,7 +102,7 @@ export default function App() {
     }
 
     return (
-      <div className="space-y-4 max-w-4xl mx-auto px-4 sm:px-6">
+      <div className="space-y-4 max-w-4xl mx-auto">
         {/* Pinned Incidents Section */}
         {sortedPinnedIncidents.length > 0 && (
           <div className="space-y-2">
@@ -157,7 +157,7 @@ export default function App() {
 
         {/* Pagination */}
         {totalPages > 1 && (
-          <div className="flex items-center justify-center gap-2 mt-6 pb-6">
+          <div className="flex items-center justify-center gap-2 mt-6">
             <button
               onClick={() => handlePageChange(currentPage - 1)}
               disabled={currentPage === 1}
@@ -165,12 +165,12 @@ export default function App() {
             >
               <ChevronLeft size={20} />
             </button>
-            <div className="flex items-center gap-1 overflow-x-auto max-w-[calc(100vw-120px)] sm:max-w-none">
+            <div className="flex items-center gap-1">
               {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
                 <button
                   key={page}
                   onClick={() => handlePageChange(page)}
-                  className={`min-w-[40px] px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                     currentPage === page
                       ? 'bg-blue-500 text-white'
                       : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700'
@@ -195,12 +195,12 @@ export default function App() {
 
   return (
     <div className={isDarkMode ? 'dark' : ''}>
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors">
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors overflow-x-hidden">
         <GoogleAnalytics />
         <BetaWarning />
         
         <header className="bg-gradient-to-r from-blue-700 to-blue-900 dark:from-blue-800 dark:to-blue-950 text-white sticky top-0 z-50 shadow-xl">
-          <div className="max-w-7xl mx-auto px-4 py-3">
+          <div className="max-w-7xl mx-auto px-3 sm:px-4 py-3">
             <div className="flex items-center justify-between flex-wrap gap-y-2">
               <div className="flex items-center">
                 <img 
@@ -209,20 +209,20 @@ export default function App() {
                   className="h-10 sm:h-14 w-auto object-contain"
                 />
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1 sm:gap-2">
                 <button
                   onClick={toggleMute}
-                  className="p-2 hover:bg-white/10 rounded-lg transition-colors"
+                  className="p-1.5 sm:p-2 hover:bg-white/10 rounded-lg transition-colors"
                   title={muted ? 'Unmute notifications' : 'Mute notifications'}
                 >
-                  {muted ? <VolumeX size={20} /> : <Volume2 size={20} />}
+                  {muted ? <VolumeX size={18} /> : <Volume2 size={18} />}
                 </button>
                 <button
                   onClick={toggleDarkMode}
-                  className="p-2 hover:bg-white/10 rounded-lg transition-colors"
+                  className="p-1.5 sm:p-2 hover:bg-white/10 rounded-lg transition-colors"
                   title={isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'}
                 >
-                  {isDarkMode ? <Sun size={20} /> : <Moon size={20} />}
+                  {isDarkMode ? <Sun size={18} /> : <Moon size={18} />}
                 </button>
                 <BugReportButton />
                 <div className="hidden sm:block">
@@ -237,9 +237,9 @@ export default function App() {
           </div>
         </header>
 
-        <main className="container mx-auto py-4">
+        <main className="w-full max-w-7xl mx-auto py-4">
           {!isLoading && !isError && incidents.length > 0 && (
-            <div className="mb-6 h-[300px] sm:h-[400px] relative z-0 mx-4">
+            <div className="mb-6 h-[300px] sm:h-[400px] relative z-0 mx-3 sm:mx-4">
               <IncidentMap 
                 incidents={incidents} 
                 activeIncidentId={activeIncidentId}
@@ -247,7 +247,9 @@ export default function App() {
               />
             </div>
           )}
-          {renderContent}
+          <div className="px-3 sm:px-4">
+            {renderContent}
+          </div>
         </main>
 
         <ScrollToTop />
