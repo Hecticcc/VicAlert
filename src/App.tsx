@@ -77,7 +77,7 @@ export default function App() {
     if (isError) {
       return (
         <div className="flex items-center justify-center h-[50vh]">
-          <div className="text-center bg-red-50 dark:bg-red-900/30 p-8 rounded-xl max-w-md">
+          <div className="text-center bg-red-50 dark:bg-red-900/30 p-8 rounded-xl max-w-md mx-4">
             <h3 className="text-lg font-semibold text-red-600 dark:text-red-400 mb-4">Unable to load incidents</h3>
             <p className="text-gray-600 dark:text-gray-300 mb-6">There was a problem connecting to the incident feed.</p>
             <button 
@@ -102,7 +102,7 @@ export default function App() {
     }
 
     return (
-      <div className="space-y-4 max-w-4xl mx-auto">
+      <div className="space-y-4 max-w-4xl mx-auto px-4 sm:px-6">
         {/* Pinned Incidents Section */}
         {sortedPinnedIncidents.length > 0 && (
           <div className="space-y-2">
@@ -157,7 +157,7 @@ export default function App() {
 
         {/* Pagination */}
         {totalPages > 1 && (
-          <div className="flex items-center justify-center gap-2 mt-6">
+          <div className="flex items-center justify-center gap-2 mt-6 pb-6">
             <button
               onClick={() => handlePageChange(currentPage - 1)}
               disabled={currentPage === 1}
@@ -165,12 +165,12 @@ export default function App() {
             >
               <ChevronLeft size={20} />
             </button>
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-1 overflow-x-auto max-w-[calc(100vw-120px)] sm:max-w-none">
               {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
                 <button
                   key={page}
                   onClick={() => handlePageChange(page)}
-                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  className={`min-w-[40px] px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
                     currentPage === page
                       ? 'bg-blue-500 text-white'
                       : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700'
@@ -200,16 +200,16 @@ export default function App() {
         <BetaWarning />
         
         <header className="bg-gradient-to-r from-blue-700 to-blue-900 dark:from-blue-800 dark:to-blue-950 text-white sticky top-0 z-50 shadow-xl">
-          <div className="container mx-auto px-4 py-3">
-            <div className="flex items-center justify-between">
+          <div className="max-w-7xl mx-auto px-4 py-3">
+            <div className="flex items-center justify-between flex-wrap gap-y-2">
               <div className="flex items-center">
                 <img 
                   src="https://imgur.com/pxkaqfE.png" 
                   alt="VicAlert" 
-                  className="h-14 w-auto object-contain"
+                  className="h-10 sm:h-14 w-auto object-contain"
                 />
               </div>
-              <div className="flex items-center gap-2 sm:gap-4">
+              <div className="flex items-center gap-2">
                 <button
                   onClick={toggleMute}
                   className="p-2 hover:bg-white/10 rounded-lg transition-colors"
@@ -237,9 +237,9 @@ export default function App() {
           </div>
         </header>
 
-        <main className="container mx-auto px-4 py-4">
+        <main className="container mx-auto py-4">
           {!isLoading && !isError && incidents.length > 0 && (
-            <div className="mb-6 h-[400px] relative z-0">
+            <div className="mb-6 h-[300px] sm:h-[400px] relative z-0 mx-4">
               <IncidentMap 
                 incidents={incidents} 
                 activeIncidentId={activeIncidentId}

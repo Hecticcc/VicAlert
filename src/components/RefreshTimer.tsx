@@ -15,7 +15,7 @@ export const RefreshTimer = memo(function RefreshTimer({
   const seconds = Math.ceil(timeUntilRefresh / 1000);
   
   return (
-    <div className="flex items-center gap-3">
+    <div className="flex items-center gap-2">
       <button
         onClick={onRefresh}
         disabled={isLoading}
@@ -27,7 +27,7 @@ export const RefreshTimer = memo(function RefreshTimer({
           className={`${isLoading ? 'animate-spin' : ''} text-white/90`}
         />
       </button>
-      <span className="text-sm text-white/90 whitespace-nowrap">
+      <span className="text-sm text-white/90 whitespace-nowrap hidden sm:inline">
         Refreshing in {seconds}s
       </span>
     </div>

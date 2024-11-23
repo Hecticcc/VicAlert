@@ -19,7 +19,7 @@ export const BetaWarning = memo(function BetaWarning() {
               <strong className="font-semibold">Beta Version {VERSION}</strong>
               <span className="hidden sm:inline"> • </span>
               <br className="sm:hidden" />
-              <span>
+              <span className="text-[11px] sm:text-xs">
                 This is a preliminary release. Do not rely on this information in emergency situations.
                 Always follow official emergency services guidance.
               </span>

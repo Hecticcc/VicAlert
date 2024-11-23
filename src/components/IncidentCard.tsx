@@ -78,11 +78,11 @@ export const IncidentCard = memo(function IncidentCard({ incident, pinnedInfo }:
 
   return (
     <>
-      <div className={`flex items-center gap-4 p-4 bg-white dark:bg-gray-800 rounded-lg shadow-sm hover:shadow-md transition-all border border-gray-100 dark:border-gray-700 ${
+      <div className={`flex flex-col sm:flex-row items-start gap-4 p-4 bg-white dark:bg-gray-800 rounded-lg shadow-sm hover:shadow-md transition-all border border-gray-100 dark:border-gray-700 ${
         pinnedInfo ? 'ring-2 ring-purple-200 dark:ring-purple-800' : ''
       }`}>
         {/* Left side - Priority indicator */}
-        <div className="flex flex-col items-center gap-2">
+        <div className="flex flex-row sm:flex-col items-center gap-2">
           <div className="relative">
             <div className={`w-1.5 h-14 rounded-full ${
               isPending ? 'bg-gray-200 dark:bg-gray-600' :
@@ -113,7 +113,7 @@ export const IncidentCard = memo(function IncidentCard({ incident, pinnedInfo }:
         {/* Main content */}
         <div className="flex-1 min-w-0">
           {/* Top row - Status, time, and district */}
-          <div className="flex items-center gap-2 mb-2 flex-wrap">
+          <div className="flex flex-wrap items-center gap-2 mb-2">
             <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${severityColors.light[incident.severity]} ${severityColors.dark[incident.severity]}`}>
               {incident.severity.toUpperCase()}
             </span>
@@ -135,7 +135,7 @@ export const IncidentCard = memo(function IncidentCard({ incident, pinnedInfo }:
               <div className="flex items-center gap-1 px-2 py-0.5 bg-amber-50 dark:bg-amber-900/30 rounded-full">
                 <AlertCircle size={12} className="text-amber-500 dark:text-amber-400" />
                 <span className="text-xs font-medium text-amber-600 dark:text-amber-400">
-                  Additional Appliances Requested
+                  Additional Appliances
                 </span>
               </div>
             )}
@@ -176,7 +176,7 @@ export const IncidentCard = memo(function IncidentCard({ incident, pinnedInfo }:
           </div>
 
           {/* Stations */}
-          <div className="flex items-center gap-1.5">
+          <div className="flex items-center gap-1.5 flex-wrap">
             <Building2 size={14} className="text-gray-400 dark:text-gray-500 flex-shrink-0" />
             <div className="flex flex-wrap gap-1">
               {incident.stations.map((station) => (
@@ -199,7 +199,7 @@ export const IncidentCard = memo(function IncidentCard({ incident, pinnedInfo }:
         </div>
 
         {/* Right side - Actions */}
-        <div className="flex flex-col items-end gap-2">
+        <div className="flex flex-row sm:flex-col items-end gap-2 mt-2 sm:mt-0">
           <button
             onClick={handleShare}
             className="p-1.5 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-md transition-colors"
@@ -242,7 +242,7 @@ export const IncidentCard = memo(function IncidentCard({ incident, pinnedInfo }:
             <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
               {incident.alertType}
             </p>
-            <pre className="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap font-mono bg-gray-50 dark:bg-gray-900 p-4 rounded-lg">
+            <pre className="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap font-mono bg-gray-50 dark:bg-gray-900 p-4 rounded-lg overflow-x-auto">
               {incident.rawText}
             </pre>
           </div>
