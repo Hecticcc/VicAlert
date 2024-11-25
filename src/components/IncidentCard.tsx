@@ -12,9 +12,15 @@ interface IncidentCardProps {
   pinnedInfo?: { pinnedAt: number; duration: number };
 }
 
-// Utility function to mask PEG numbers and any following characters
-const maskPegNumbers = (text: string) => {
-  return text.replace(/PEG[:.]?\s*[A-Z0-9]+/gi, 'PEG ********');
+// Utility function to mask sensitive information
+const maskSensitiveInfo = (text: string) => {
+  // Mask PEG numbers and any following characters
+  let maskedText = text.replace(/PEG[:.]?\s*[A-Z0-9]+/gi, 'PEG ********');
+  
+  // Mask Australian mobile numbers (04XXXXXXXX format)
+  maskedText = maskedText.replace(/\b04\d{8}\b/g, '04********');
+  
+  return maskedText;
 };
 
 export const IncidentCard = memo(function IncidentCard({ incident, pinnedInfo }: IncidentCardProps) {
@@ -49,8 +55,8 @@ export const IncidentCard = memo(function IncidentCard({ incident, pinnedInfo }:
   const handleShare = () => {
     if (navigator.share) {
       navigator.share({
-        title: `Fire Incident: ${maskPegNumbers(incident.title)}`,
-        text: `${incident.alertType} - ${maskPegNumbers(incident.location.address)}\n${maskPegNumbers(incident.description)}`,
+        title: `Fire Incident: ${maskSensitiveInfo(incident.title)}`,
+        text: `${incident.alertType} - ${maskSensitiveInfo(incident.location.address)}\n${maskSensitiveInfo(incident.description)}`,
         url: window.location.href
       }).catch(console.error);
     }
@@ -62,17 +68,17 @@ export const IncidentCard = memo(function IncidentCard({ incident, pinnedInfo }:
     roundingMethod: 'floor'
   });
 
-  // Clean up description by removing location information and masking PEG numbers
-  const cleanDescription = maskPegNumbers(
+  // Clean up description by removing location information and masking sensitive info
+  const cleanDescription = maskSensitiveInfo(
     incident.description
       .replace(new RegExp(`^${incident.location.address}\\s*`, 'i'), '')
       .replace(/^\d+\s+/, '') // Remove leading numbers
       .trim()
   );
 
-  // Mask PEG numbers in location
-  const maskedAddress = maskPegNumbers(incident.location.address);
-  const maskedCrossStreet = incident.location.crossStreet ? maskPegNumbers(incident.location.crossStreet) : undefined;
+  // Mask sensitive info in location
+  const maskedAddress = maskSensitiveInfo(incident.location.address);
+  const maskedCrossStreet = incident.location.crossStreet ? maskSensitiveInfo(incident.location.crossStreet) : undefined;
 
   if (isStationMovement) {
     const movement = parseStationMovement(incident.rawText || '');
@@ -254,7 +260,7 @@ export const IncidentCard = memo(function IncidentCard({ incident, pinnedInfo }:
               {incident.alertType}
             </p>
             <pre className="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap font-mono bg-gray-50 dark:bg-gray-900 p-4 rounded-lg">
-              {incident.rawText ? maskPegNumbers(incident.rawText) : ''}
+              {incident.rawText ? maskSensitiveInfo(incident.rawText) : ''}
             </pre>
           </div>
 

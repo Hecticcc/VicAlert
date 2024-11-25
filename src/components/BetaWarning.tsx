@@ -1,6 +1,5 @@
-import { memo } from 'react';
+import { memo, useState } from 'react';
 import { AlertTriangle, X } from 'lucide-react';
-import { useState } from 'react';
 
 const VERSION = '0.9.2b-beta';
 

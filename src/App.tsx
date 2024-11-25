@@ -1,4 +1,4 @@
-import { useMemo, useState, useCallback, useEffect } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { Moon, Sun, Volume2, VolumeX, ChevronLeft, ChevronRight } from 'lucide-react';
 import { IncidentCard } from './components/IncidentCard';
 import { RefreshTimer } from './components/RefreshTimer';
@@ -204,7 +204,7 @@ export default function App() {
             <div className="flex items-center justify-between flex-wrap gap-y-2">
               <div className="flex items-center">
                 <img 
-                  src="https://imgur.com/pxkaqfE.png" 
+                  src="https://imgur.com/pxkaqfE.png"
                   alt="VicAlert" 
                   className="h-10 sm:h-14 w-auto object-contain"
                 />
