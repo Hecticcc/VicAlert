@@ -2,7 +2,7 @@ import { memo } from 'react';
 import { AlertTriangle, X } from 'lucide-react';
 import { useState } from 'react';
 
-const VERSION = '0.9.2-beta';
+const VERSION = '0.9.2b-beta';
 
 export const BetaWarning = memo(function BetaWarning() {
   const [isVisible, setIsVisible] = useState(true);

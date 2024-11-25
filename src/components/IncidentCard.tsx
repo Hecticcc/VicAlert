@@ -12,6 +12,11 @@ interface IncidentCardProps {
   pinnedInfo?: { pinnedAt: number; duration: number };
 }
 
+// Utility function to mask PEG numbers and any following characters
+const maskPegNumbers = (text: string) => {
+  return text.replace(/PEG[:.]?\s*[A-Z0-9]+/gi, 'PEG ********');
+};
+
 export const IncidentCard = memo(function IncidentCard({ incident, pinnedInfo }: IncidentCardProps) {
   const [showModal, setShowModal] = useState(false);
 
@@ -44,8 +49,8 @@ export const IncidentCard = memo(function IncidentCard({ incident, pinnedInfo }:
   const handleShare = () => {
     if (navigator.share) {
       navigator.share({
-        title: `Fire Incident: ${incident.title}`,
-        text: `${incident.alertType} - ${incident.location.address}\n${incident.description}`,
+        title: `Fire Incident: ${maskPegNumbers(incident.title)}`,
+        text: `${incident.alertType} - ${maskPegNumbers(incident.location.address)}\n${maskPegNumbers(incident.description)}`,
         url: window.location.href
       }).catch(console.error);
     }
@@ -57,11 +62,17 @@ export const IncidentCard = memo(function IncidentCard({ incident, pinnedInfo }:
     roundingMethod: 'floor'
   });
 
-  // Clean up description by removing location information if it matches
-  const cleanDescription = incident.description
-    .replace(new RegExp(`^${incident.location.address}\\s*`, 'i'), '')
-    .replace(/^\d+\s+/, '') // Remove leading numbers
-    .trim();
+  // Clean up description by removing location information and masking PEG numbers
+  const cleanDescription = maskPegNumbers(
+    incident.description
+      .replace(new RegExp(`^${incident.location.address}\\s*`, 'i'), '')
+      .replace(/^\d+\s+/, '') // Remove leading numbers
+      .trim()
+  );
+
+  // Mask PEG numbers in location
+  const maskedAddress = maskPegNumbers(incident.location.address);
+  const maskedCrossStreet = incident.location.crossStreet ? maskPegNumbers(incident.location.crossStreet) : undefined;
 
   if (isStationMovement) {
     const movement = parseStationMovement(incident.rawText || '');
@@ -165,11 +176,11 @@ export const IncidentCard = memo(function IncidentCard({ incident, pinnedInfo }:
             <MapPin size={14} className="text-gray-400 dark:text-gray-500 mt-0.5 flex-shrink-0" />
             <div className="min-w-0 flex-1">
               <p className="text-sm text-gray-600 dark:text-gray-300 break-words">
-                {incident.location.address}
+                {maskedAddress}
               </p>
-              {incident.location.crossStreet && (
+              {maskedCrossStreet && (
                 <p className="text-xs text-gray-500 dark:text-gray-400 break-words">
-                  Cross streets: {incident.location.crossStreet}
+                  Cross streets: {maskedCrossStreet}
                 </p>
               )}
             </div>
@@ -243,7 +254,7 @@ export const IncidentCard = memo(function IncidentCard({ incident, pinnedInfo }:
               {incident.alertType}
             </p>
             <pre className="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap font-mono bg-gray-50 dark:bg-gray-900 p-4 rounded-lg">
-              {incident.rawText}
+              {incident.rawText ? maskPegNumbers(incident.rawText) : ''}
             </pre>
           </div>
 
