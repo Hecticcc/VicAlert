@@ -1,4 +1,4 @@
-import { memo, useState } from 'react';
+import { memo } from 'react';
 import { Clock, Share2, MapPin, Building2, AlertCircle, Heart, MapPinned } from 'lucide-react';
 import { format, formatDistanceToNowStrict } from 'date-fns';
 import { Incident } from '../types/incident';
@@ -6,6 +6,7 @@ import { Modal } from './Modal';
 import { StationBadge } from './StationBadge';
 import { StationMovement } from './StationMovement';
 import { PinnedBadge } from './PinnedBadge';
+import { useModalState } from '../hooks/useModalState';
 
 interface IncidentCardProps {
   incident: Incident;
@@ -24,7 +25,7 @@ const maskSensitiveInfo = (text: string) => {
 };
 
 export const IncidentCard = memo(function IncidentCard({ incident, pinnedInfo }: IncidentCardProps) {
-  const [showModal, setShowModal] = useState(false);
+  const { isOpen, open, close, modalRef } = useModalState(incident.reference);
 
   const severityColors = {
     light: {
@@ -206,7 +207,7 @@ export const IncidentCard = memo(function IncidentCard({ incident, pinnedInfo }:
             </div>
             {incident.reference && (
               <button
-                onClick={() => setShowModal(true)}
+                onClick={open}
                 className="text-xs text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 ml-2 underline whitespace-nowrap"
               >
                 {incident.reference}
@@ -228,9 +229,10 @@ export const IncidentCard = memo(function IncidentCard({ incident, pinnedInfo }:
       </div>
 
       <Modal
-        isOpen={showModal}
-        onClose={() => setShowModal(false)}
+        isOpen={isOpen}
+        onClose={close}
         title={`Incident ${incident.reference}`}
+        modalRef={modalRef}
       >
         <div className="space-y-4">
           <div className="flex items-center gap-2 flex-wrap">
