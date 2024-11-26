@@ -15,5 +15,10 @@ export default defineConfig({
       'react': 'react',
       'react-dom': 'react-dom'
     }
+  },
+  build: {
+    outDir: 'dist',
+    sourcemap: true,
+    minify: true
   }
 });
