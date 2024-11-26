@@ -220,16 +220,6 @@ function determineTags(text: string): string[] {
   return tags;
 }
 
-function extractFRVCode(text: string): string | undefined {
-  const match = text.match(/@@ALERT\s+(\d{2,5})\s/);
-  if (match) {
-    const fullCode = match[1];
-    const stationNumber = fullCode.replace(/^0+/, '').slice(0, 2).padStart(2, '0');
-    return `P${stationNumber}`;
-  }
-  return undefined;
-}
-
 function determineDistrict(text: string): number | undefined {
   const brigadeMatch = text.match(/@@ALERT\s+([A-Z0-9]+)\s/);
   if (!brigadeMatch) return undefined;
