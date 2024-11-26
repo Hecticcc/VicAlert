@@ -1,4 +1,4 @@
-import { useEffect, useCallback } from 'react';
+import { useEffect, useCallback, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
 
@@ -11,6 +11,9 @@ interface ModalProps {
 }
 
 export function Modal({ isOpen, onClose, children, title, modalRef }: ModalProps) {
+  const internalRef = useRef<HTMLDivElement>(null);
+  const modalReference = modalRef || internalRef;
+
   // Handle escape key
   const handleEscape = useCallback((e: KeyboardEvent) => {
     if (e.key === 'Escape') onClose();
@@ -43,8 +46,8 @@ export function Modal({ isOpen, onClose, children, title, modalRef }: ModalProps
       onClick={handleBackdropClick}
     >
       <div
-        ref={modalRef}
-        className="w-full max-w-lg bg-white dark:bg-gray-800 rounded-lg shadow-xl animate-modalEnter flex flex-col relative mx-4 max-h-[90vh] overflow-hidden"
+        ref={modalReference}
+        className="w-full max-w-2xl bg-white dark:bg-gray-800 rounded-xl shadow-xl animate-modalEnter flex flex-col relative mx-4 max-h-[90vh] overflow-hidden"
         onClick={e => e.stopPropagation()}
       >
         <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
@@ -61,7 +64,7 @@ export function Modal({ isOpen, onClose, children, title, modalRef }: ModalProps
             <X size={20} />
           </button>
         </div>
-        <div className="p-4 overflow-y-auto">
+        <div className="p-6 overflow-y-auto custom-scrollbar">
           {children}
         </div>
       </div>
