@@ -13,6 +13,7 @@ import { BugReportButton } from './components/BugReportButton';
 import { LoadingSpinner } from './components/LoadingSpinner';
 
 const INCIDENTS_PER_PAGE = 50;
+const LOGO_URL = "https://imgur.com/pxkaqfE.png";
 
 export default function App() {
   const { incidents, isLoading, isError, timeUntilRefresh, refresh, pinnedIncidents } = useIncidents();
@@ -23,13 +24,11 @@ export default function App() {
   
   const handleIncidentClick = useCallback((id: string) => {
     setActiveIncidentId(id);
-    // Track incident clicks in Google Analytics
     window.gtag?.('event', 'incident_click', {
       incident_id: id
     });
   }, []);
 
-  // Reset to first page when incidents change
   useEffect(() => {
     setCurrentPage(1);
   }, [incidents.length]);
@@ -37,17 +36,14 @@ export default function App() {
   const { pinnedIncidents: sortedPinnedIncidents, paginatedIncidents, totalPages } = useMemo(() => {
     const pinnedIds = new Set(pinnedIncidents.map(pin => pin.id));
     
-    // Get pinned incidents
     const pinned = incidents
       .filter(incident => pinnedIds.has(incident.id))
       .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
     
-    // Get unpinned incidents
     const unpinned = incidents
       .filter(incident => !pinnedIds.has(incident.id))
       .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
 
-    // Calculate pagination
     const startIndex = (currentPage - 1) * INCIDENTS_PER_PAGE;
     const endIndex = startIndex + INCIDENTS_PER_PAGE;
     const paginatedList = unpinned.slice(startIndex, endIndex);
@@ -63,7 +59,6 @@ export default function App() {
   const handlePageChange = useCallback((page: number) => {
     setCurrentPage(page);
     window.scrollTo({ top: 0, behavior: 'smooth' });
-    // Track page changes in Google Analytics
     window.gtag?.('event', 'page_change', {
       page_number: page
     });
@@ -103,7 +98,6 @@ export default function App() {
 
     return (
       <div className="space-y-4 max-w-4xl mx-auto">
-        {/* Pinned Incidents Section */}
         {sortedPinnedIncidents.length > 0 && (
           <div className="space-y-2">
             <h2 className="text-lg font-semibold text-purple-600 dark:text-purple-400 flex items-center gap-2">
@@ -129,7 +123,6 @@ export default function App() {
           </div>
         )}
 
-        {/* Regular Incidents Section */}
         <div className="space-y-2">
           {sortedPinnedIncidents.length > 0 && paginatedIncidents.length > 0 && (
             <h2 className="text-lg font-semibold text-gray-600 dark:text-gray-400">
@@ -155,7 +148,6 @@ export default function App() {
           })}
         </div>
 
-        {/* Pagination */}
         {totalPages > 1 && (
           <div className="flex items-center justify-center gap-2 mt-6">
             <button
@@ -204,7 +196,7 @@ export default function App() {
             <div className="flex items-center justify-between flex-wrap gap-y-2">
               <div className="flex items-center">
                 <img 
-                  src="https://imgur.com/pxkaqfE.png"
+                  src={LOGO_URL}
                   alt="VicAlert" 
                   className="h-10 sm:h-14 w-auto object-contain"
                 />

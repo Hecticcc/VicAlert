@@ -79,3 +79,24 @@
 .incident-marker:hover {
   transform: scale(1.1);
 }
+
+/* Modal styles */
+body:has(.modal-backdrop) {
+  overflow: hidden !important;
+}
+
+/* Animation for modal */
+@keyframes modalEnter {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animate-modalEnter {
+  animation: modalEnter 0.2s ease-out;
+}
