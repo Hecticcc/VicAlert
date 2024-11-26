@@ -24,8 +24,23 @@ const EXCLUDED_CODES = new Set([
   'AFPR', 'FP', 'AFEMR', 'EMRR11', 'EMRR13', 'FAFSCC', 'AFPEMR',
   'FGD', 'AFP', 'FA', 'E24112111103', 'OAT', 'ORO', 'AFPS', 'RKE',
   'AIRSWL', 'BDG372', 'BOM356', 'BOM357', 'WBEER', 'GEEFC', 'AIRSEA',
-  'WENOFO'
+  'WENOFO', 'EMR', 'EMERG'
 ]);
+
+// EMR related keywords to filter out incidents
+const EMR_KEYWORDS = [
+  'emr',
+  'emergency medical response',
+  'medical emergency',
+  'afemr',
+  'emrr',
+  'medical incident'
+];
+
+function shouldFilterIncident(text: string): boolean {
+  const lowerText = text.toLowerCase();
+  return EMR_KEYWORDS.some(keyword => lowerText.includes(keyword));
+}
 
 function isStationMovement(text: string): boolean {
   return /@@ALERT\s+(?:P\d+[A-Z]?)\s+MOVE\s+TO\s+STATION/i.test(text);
@@ -157,17 +172,14 @@ function parseStations(text: string): { stations: string[]; stationDisplay: stri
     return { stations: [], stationDisplay: '', additionalStations: [] };
   }
 
-  // Get initial stations from first alert
   const initialStations = new Set(extractStationsFromLine(lines[lines.length - 1]));
   const allStations = new Set(initialStations);
   const additionalStations: string[] = [];
 
-  // Process subsequent alerts in chronological order
   for (let i = lines.length - 2; i >= 0; i--) {
     const line = lines[i];
     const lineStations = extractStationsFromLine(line);
 
-    // Check for new stations not in the initial set
     lineStations.forEach(station => {
       if (!initialStations.has(station)) {
         additionalStations.push(station);
@@ -187,12 +199,10 @@ function parseStations(text: string): { stations: string[]; stationDisplay: stri
 }
 
 function determineSeverity(text: string, stationCount: number): Incident['severity'] {
-  // Check if this is a FAFSCC alert
   if (text.includes('FAFSCC') || text.includes('[FAFSCC]')) {
     return 'pending';
   }
 
-  // Strict station count thresholds for severity levels
   if (stationCount >= 31) return 'critical';
   if (stationCount >= 15) return 'extreme';
   if (stationCount >= 9) return 'high';
@@ -203,7 +213,6 @@ function determineSeverity(text: string, stationCount: number): Incident['severi
 function determineTags(text: string): string[] {
   const tags: string[] = [];
   
-  // Check for AFEMR (medical) incidents
   if (text.includes('AFEMR') || text.toLowerCase().includes('medical emergency')) {
     tags.push('medical');
   }
@@ -212,11 +221,9 @@ function determineTags(text: string): string[] {
 }
 
 function extractFRVCode(text: string): string | undefined {
-  // Match both 5-digit and 3-digit codes after @@ALERT
   const match = text.match(/@@ALERT\s+(\d{2,5})\s/);
   if (match) {
     const fullCode = match[1];
-    // Remove leading zeros and take first two digits
     const stationNumber = fullCode.replace(/^0+/, '').slice(0, 2).padStart(2, '0');
     return `P${stationNumber}`;
   }
@@ -224,35 +231,23 @@ function extractFRVCode(text: string): string | undefined {
 }
 
 function determineDistrict(text: string): number | undefined {
-  // First try to extract FRV code
-  const frvCode = extractFRVCode(text);
-  if (frvCode) {
-    return getDistrictFromCode(frvCode);
-  }
-
-  // If no FRV code, try to match CFA brigade code
   const brigadeMatch = text.match(/@@ALERT\s+([A-Z0-9]+)\s/);
   if (!brigadeMatch) return undefined;
 
   const code = brigadeMatch[1];
 
-  // If it's a numeric code (FRV station)
   if (/^\d+$/.test(code)) {
-    // Remove leading zeros and take first two digits
     const stationNumber = code.replace(/^0+/, '').slice(0, 2).padStart(2, '0');
     return getDistrictFromCode(`P${stationNumber}`);
   }
 
-  // Try direct lookup first
   let district = getDistrictFromCode(code);
   if (district) return district;
 
-  // Try without numbers and special characters
   const cleanCode = code.replace(/[0-9\[\]_]/g, '');
   district = getDistrictFromCode(cleanCode);
   if (district) return district;
 
-  // If still no match and it's a P or FS code, try the other prefix
   if (code.startsWith('P')) {
     district = getDistrictFromCode(`FS${code.slice(1)}`);
   } else if (code.startsWith('FS')) {
@@ -280,6 +275,11 @@ export function parseIncidentData(text: string): Incident[] {
   const incidentGroups = new Map<string, string[]>();
   
   lines.forEach(line => {
+    // Skip EMR alerts
+    if (shouldFilterIncident(line)) {
+      return;
+    }
+
     if (isStationMovement(line)) {
       const timestamp = line.match(/^\d+\s+(\d{2}:\d{2}:\d{2})/)?.[1] || Date.now().toString();
       const ref = `MOVE_${timestamp.replace(/:/g, '')}`;
@@ -296,53 +296,50 @@ export function parseIncidentData(text: string): Incident[] {
     }
   });
 
-  return Array.from(incidentGroups.entries()).map(([reference, group]): Incident => {
-    const mainLine = group
-      .sort((a, b) => {
-        const timeA = a.match(/\d{2}:\d{2}:\d{2}/)?.[0] || '';
-        const timeB = b.match(/\d{2}:\d{2}:\d{2}/)?.[0] || '';
-        return timeB.localeCompare(timeA);
-      })[0];
+  return Array.from(incidentGroups.entries())
+    .map(([reference, group]): Incident => {
+      const mainLine = group
+        .sort((a, b) => {
+          const timeA = a.match(/\d{2}:\d{2}:\d{2}/)?.[0] || '';
+          const timeB = b.match(/\d{2}:\d{2}:\d{2}/)?.[0] || '';
+          return timeB.localeCompare(timeA);
+        })[0];
 
-    const { alertCode, alertType } = determineAlertType(mainLine);
-    const description = extractDescription(mainLine);
-    const location = parseLocation(mainLine);
-    const { stations, stationDisplay, additionalStations } = parseStations(group.join('\n'));
-    const tags = determineTags(mainLine);
+      const { alertCode, alertType } = determineAlertType(mainLine);
+      const description = extractDescription(mainLine);
+      const location = parseLocation(mainLine);
+      const { stations, stationDisplay, additionalStations } = parseStations(group.join('\n'));
+      const tags = determineTags(mainLine);
+      const district = determineDistrict(mainLine);
+      const initialBrigadeMatch = mainLine.match(/@@ALERT\s+([A-Z0-9]+)\s/);
+      const initialBrigade = initialBrigadeMatch ? initialBrigadeMatch[1] : undefined;
 
-    // Determine district using the extracted FRV code or brigade code
-    const district = determineDistrict(mainLine);
+      const timestampMatch = mainLine.match(/(\d{2}:\d{2}:\d{2})\s+(\d{4}-\d{2}-\d{2})/);
+      const timestamp = timestampMatch 
+        ? new Date(`${timestampMatch[2]}T${timestampMatch[1]}`).toISOString()
+        : new Date().toISOString();
 
-    // Extract initial brigade code for reference
-    const initialBrigadeMatch = mainLine.match(/@@ALERT\s+([A-Z0-9]+)\s/);
-    const initialBrigade = initialBrigadeMatch ? initialBrigadeMatch[1] : undefined;
-
-    const timestampMatch = mainLine.match(/(\d{2}:\d{2}:\d{2})\s+(\d{4}-\d{2}-\d{2})/);
-    const timestamp = timestampMatch 
-      ? new Date(`${timestampMatch[2]}T${timestampMatch[1]}`).toISOString()
-      : new Date().toISOString();
-
-    return {
-      id: `${Date.now()}-${Math.random()}`,
-      stationId: stations[0] || 'UNKNOWN',
-      stations,
-      additionalStations,
-      alertCode,
-      alertType,
-      title: description || alertType,
-      location,
-      coordinates: [0, 0],
-      timestamp,
-      status: 'active',
-      severity: determineSeverity(mainLine, stations.length),
-      description,
-      reference: reference.startsWith('MOVE_') ? undefined : reference,
-      stationDisplay,
-      rawText: group.join('\n'),
-      hasUpdate: group.length > 1,
-      tags,
-      district,
-      initialBrigade
-    };
-  });
+      return {
+        id: `${Date.now()}-${Math.random()}`,
+        stationId: stations[0] || 'UNKNOWN',
+        stations,
+        additionalStations,
+        alertCode,
+        alertType,
+        title: description || alertType,
+        location,
+        coordinates: [0, 0],
+        timestamp,
+        status: 'active',
+        severity: determineSeverity(mainLine, stations.length),
+        description,
+        reference: reference.startsWith('MOVE_') ? undefined : reference,
+        stationDisplay,
+        rawText: group.join('\n'),
+        hasUpdate: group.length > 1,
+        tags,
+        district,
+        initialBrigade
+      };
+    });
 }
